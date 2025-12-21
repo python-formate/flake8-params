@@ -13,6 +13,7 @@ to allow other plugins to build on top of ``flake8-params``.
 	:autosummary-members:
 
 .. autofunction:: flake8_params.get_decorator_names
+.. autofunction:: flake8_params.check_params
 
 .. autoclass:: flake8_params.Plugin
 	:no-members:
