@@ -43,6 +43,7 @@ known_third_party = [
     "pytest_timeout",
     "requests",
 ]
+known_first_party = [ "flake8_params",]
 
 [config]
 indent = "	"
