@@ -19,7 +19,6 @@ enable_conda: false
 
 # Versions to run tests for
 python_versions:
- - '3.7'
  - '3.8'
  - '3.9'
  - "3.10"
