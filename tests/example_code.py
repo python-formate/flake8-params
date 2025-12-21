@@ -287,3 +287,61 @@ class AsyncClass:
 
 async def no_docstring_async(foo, bar, baz):
 	pass
+
+
+def missing_args(foo, bar, *baz):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	"""
+
+
+def has_args(foo, bar, *baz):
+	r"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param \*baz:
+	"""
+
+
+def missing_kwargs(foo, bar, **baz):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	"""
+
+
+def has_kwargs(foo, bar, **baz):
+	r"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param \*\*baz:
+	"""
+
+
+def keyword_only(foo, bar, *, baz=None):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""
+
+
+def positional_only(foo, /, bar, baz):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""

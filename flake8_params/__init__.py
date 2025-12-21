@@ -33,7 +33,7 @@ from typing import Iterator, List, Optional, Union
 # 3rd party
 import flake8_helper
 
-__all__ = ("Plugin", "Visitor", "get_decorator_names", "check_params")
+__all__ = ("Plugin", "Visitor", "get_decorator_names", "check_params", "get_docstring_args", "get_signature_args")
 
 __author__ = "Dominic Davis-Foster"
 __copyright__ = "2025 Dominic Davis-Foster"
@@ -42,8 +42,8 @@ __version__ = "0.0.0"
 __email__ = "dominic@davis-foster.co.uk"
 
 PRM001 = "PRM001 Docstring parameters in wrong order."
-PRM002 = "PRM002 Missing parameters in docstring."
-PRM003 = "PRM003 Extra parameters in docstring."
+PRM002 = "PRM002 Missing parameters in docstring"
+PRM003 = "PRM003 Extra parameters in docstring"
 # TODO: class-specific codes?
 
 deco_allowed_attr_names = {
@@ -124,12 +124,56 @@ def check_params(
 		return PRM001
 	elif signature_set - docstring_set:
 		# Extras in signature
-		return PRM002
+		return PRM002 + ": " + ' '.join(sorted(signature_set - docstring_set))
 	elif docstring_set - signature_set:
 		# Extras in docstrings
-		return PRM003
+		return PRM003 + ": " + ' '.join(sorted(docstring_set - signature_set))
 
 	return None  # pragma: no cover
+
+
+def get_signature_args(function: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> Iterator[str]:
+	"""
+	Extract arguments from the function signature.
+
+	:param function:
+
+	:rtype:
+
+	..versionadded:: 0.2.0
+	"""
+
+	for arg in function.args.posonlyargs:
+		yield arg.arg
+
+	for arg in function.args.args:
+		yield arg.arg
+
+	if function.args.vararg:
+		yield '*' + function.args.vararg.arg
+
+	for arg in function.args.kwonlyargs:
+		yield arg.arg
+
+	if function.args.kwarg:
+		yield "**" + function.args.kwarg.arg
+
+
+def get_docstring_args(docstring: str) -> Iterator[str]:
+	"""
+	Extract arguments from the docstring.
+
+	:param docstring:
+
+	:rtype:
+
+	..versionadded:: 0.2.0
+	"""
+
+	for line in docstring.split('\n'):
+		line = line.strip()
+		if line.startswith(":param"):
+			yield line[6:].split(':', 1)[0].strip().replace(r"\*", '*')
 
 
 class Visitor(flake8_helper.Visitor):
@@ -154,14 +198,8 @@ class Visitor(flake8_helper.Visitor):
 			self.generic_visit(node)
 			return
 
-		docstring_args = []
-		for line in docstring.split('\n'):
-			line = line.strip()
-			if line.startswith(":param"):
-				docstring_args.append(line[6:].split(':', 1)[0].strip())
-
-		signature_args = [a.arg for a in node.args.args]
-
+		docstring_args = list(get_docstring_args(docstring))
+		signature_args = list(get_signature_args(node))
 		decorators = list(get_decorator_names(node))
 
 		error = check_params(signature_args, docstring_args, decorators)
@@ -184,12 +222,7 @@ class Visitor(flake8_helper.Visitor):
 			self.generic_visit(node)
 			return
 
-		docstring_args = []
-		for line in docstring.split('\n'):
-			line = line.strip()
-			if line.startswith(":param"):
-				docstring_args.append(line[6:].split(':', 1)[0].strip())
-
+		docstring_args = list(get_docstring_args(docstring))
 		decorators = list(get_decorator_names(node))
 
 		signature_args = []
@@ -197,7 +230,7 @@ class Visitor(flake8_helper.Visitor):
 
 		for function in functions_in_body:
 			if function.name == "__init__":
-				signature_args = [a.arg for a in function.args.args]
+				signature_args = list(get_signature_args(function))
 				break
 		else:
 			# No __init__; maybe it comes from a base class.
