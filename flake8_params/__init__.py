@@ -3,8 +3,6 @@
 #  __init__.py
 """
 A flake8 plugin which checks for mismatches between function signatures and docstring params.
-
-.. autosummary-widths:: 1/3 2/3
 """
 #
 #  Copyright (c) 2025 Dominic Davis-Foster <dominic@davis-foster.co.uk>
