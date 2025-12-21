@@ -36,27 +36,6 @@ def docstring_wrong_order(self, foo, bar, baz):
 	"""
 
 
-@classmethod
-def is_classmethod(cls, foo, bar, baz):
-	"""
-	Does something.
-
-	:param foo:
-	:param bar:
-	:param baz:
-	"""
-
-
-@classmethod
-def missing_in_docstring_with_classmethod(cls, foo, bar, baz):
-	"""
-	Does something.
-
-	:param foo:
-	:param baz:
-	"""
-
-
 def missing_in_signature(foo, bar):
 	"""
 	Does something.
@@ -77,10 +56,88 @@ def missing_in_signature_with_self(self, foo, bar):
 	"""
 
 
-@classmethod
-def missing_in_signature_with_classmethod(cls, foo, baz):
+class ClassMissingDocstring:
 	"""
-	Does something.
+	A class.
+
+	:param foo:
+	:param bar:
+	"""
+
+	def __init__(self, foo, bar, baz):
+		pass
+
+	@classmethod
+	def is_classmethod(cls, foo, bar, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param bar:
+		:param baz:
+		"""
+
+	@classmethod
+	def missing_in_docstring_with_classmethod(cls, foo, bar, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param baz:
+		"""
+
+	@classmethod
+	def missing_in_signature_with_classmethod(cls, foo, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param bar:
+		:param baz:
+		"""
+
+	@property
+	def a_property(self):
+		"""
+		A property.
+		"""
+
+	@a_property.setter
+	def a_property(self, val):
+		"""
+		A property.
+		"""
+
+
+class ClassMissingSignature:
+	"""
+	A class.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""
+
+	def __init__(self, foo, bar):
+		pass
+
+
+class ClassWrongOrder:
+	"""
+	A class.
+
+	:param bar:
+	:param foo:
+	:param baz:
+	"""
+
+	def __init__(self, foo, bar, baz):
+		pass
+
+
+class ClassNoInit:
+	"""
+	A class.
 
 	:param foo:
 	:param bar:
@@ -88,18 +145,35 @@ def missing_in_signature_with_classmethod(cls, foo, baz):
 	"""
 
 
-@property
-def a_property(self):
-	"""
-	A property.
-	"""
+class ClassNoDocstring:
+
+	def __init__(self, foo, bar, baz):
+		pass
 
 
-@a_property.setter
-def a_property(self, val):
+class ClassInitDocstring:
+
+	def __init__(self, foo, bar, baz):
+		"""
+		Setup the function.
+
+		:param foo:
+		:param bar:
+		:param baz:
+		"""
+
+
+class GoodClass:
 	"""
-	A property.
+	A class.
+
+	:param foo:
+	:param bar:
+	:param baz:
 	"""
+
+	def __init__(self, foo, bar, baz):
+		pass
 
 
 # 3rd party

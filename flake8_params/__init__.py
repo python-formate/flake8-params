@@ -30,12 +30,12 @@ A flake8 plugin which checks for mismatches between function signatures and docs
 
 # stdlib
 import ast
-from typing import Iterator, Union
+from typing import Iterator, List, Optional, Union
 
 # 3rd party
 import flake8_helper
 
-__all__ = ("Plugin", "Visitor", "get_decorator_names")
+__all__ = ("Plugin", "Visitor", "get_decorator_names", "check_params")
 
 __author__ = "Dominic Davis-Foster"
 __copyright__ = "2025 Dominic Davis-Foster"
@@ -46,6 +46,7 @@ __email__ = "dominic@davis-foster.co.uk"
 PRM001 = "PRM001 Docstring parameters in wrong order."
 PRM002 = "PRM002 Missing parameters in docstring."
 PRM003 = "PRM003 Extra parameters in docstring."
+# TODO: class-specific codes?
 
 deco_allowed_attr_names = {
 		".setter",  # Property setter
@@ -73,7 +74,7 @@ def _get_deco_name(decorator: ast.expr) -> Iterator[str]:
 		raise NotImplementedError(decorator)
 
 
-def get_decorator_names(function: Union[ast.AsyncFunctionDef, ast.FunctionDef]) -> Iterator[str]:
+def get_decorator_names(function: Union[ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef]) -> Iterator[str]:
 	"""
 	Returns an iterator of the dotted names of decorators for the given function.
 
@@ -84,80 +85,135 @@ def get_decorator_names(function: Union[ast.AsyncFunctionDef, ast.FunctionDef]) 
 		yield from _get_deco_name(decorator)
 
 
+def check_params(
+		signature_args: List[str],
+		docstring_args: List[str],
+		decorators: List[str],
+		) -> Optional[str]:
+	"""
+	Check if signature and docstring parameters match, and return the flake8 error code if not.
+
+	:param signature_args:
+	:param docstring_args:
+	:param decorators: List of dotted names (e.g. ``foo.bar``, for ``@foo.bar()``) of decorators for the function or class.
+
+	:returns: Either a flake8 error code and description, or :py:obj:`None` if no errors were detected.
+	"""
+
+	if "self" in signature_args:
+		signature_args.remove("self")
+
+	if "classmethod" in decorators and signature_args:
+		signature_args.pop(0)
+	for deco in decorators:
+		if any(deco.endswith(name) for name in deco_allowed_attr_names):
+			signature_args = []
+			break
+
+	if not signature_args and not docstring_args:
+		# No args either way
+		return None
+
+	if signature_args == docstring_args:
+		# All match
+		return None
+
+	# Either wrong order, extra in signature, extra in doc
+	signature_set = set(signature_args)
+	docstring_set = set(docstring_args)
+	if signature_set == docstring_set:
+		# Wrong order
+		return PRM001
+	elif signature_set - docstring_set:
+		# Extras in signature
+		return PRM002
+	elif docstring_set - signature_set:
+		# Extras in docstrings
+		return PRM003
+
+	return None  # pragma: no cover
+
+
 class Visitor(flake8_helper.Visitor):
 	"""
 	AST node visitor for identifying mismatches between function signatures and docstring params.
 	"""
 
+	# TODO: async functions
+
 	def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: D102
-		docstring = ast.get_docstring(node, clean=False)
 		if node.name == "__init__":
-			# TODO: special case; parameters go on class
 			self.generic_visit(node)
 			return
+
+		docstring = ast.get_docstring(node, clean=False)
 
 		if not docstring:
 			self.generic_visit(node)
 			return
 
-		seen_args = []
+		docstring_args = []
 		for line in docstring.split('\n'):
 			line = line.strip()
 			if line.startswith(":param"):
-				seen_args.append(line[6:].split(':', 1)[0].strip())
+				docstring_args.append(line[6:].split(':', 1)[0].strip())
 
 		signature_args = [a.arg for a in node.args.args]
-		if "self" in signature_args:
-			signature_args.remove("self")
 
-		# decorators = [n.id for n in node.decorator_list if isinstance(n, ast.Name)]
 		decorators = list(get_decorator_names(node))
-		if "classmethod" in decorators and signature_args:
-			signature_args.pop(0)
-		for deco in decorators:
-			if any(deco.endswith(name) for name in deco_allowed_attr_names):
-				signature_args = []
-				break
 
-		if not signature_args and not seen_args:
-			# No args either way
+		error = check_params(signature_args, docstring_args, decorators)
+		if not error:
 			self.generic_visit(node)
 			return
 
-		if signature_args == seen_args:
-			# All match
-			self.generic_visit(node)
-			return
-
-		# Either wrong order, extra in signature, extra in doc
-		signature_set = set(signature_args)
-		seen_set = set(seen_args)
-		if signature_set == seen_set:
-			# Wrong order
-			self.errors.append((
-					node.lineno,
-					node.col_offset,
-					PRM001,
-					))
-		elif signature_set - seen_set:
-			# Extras in signature
-			self.errors.append((
-					node.lineno,
-					node.col_offset,
-					PRM002,
-					))
-		elif seen_set - signature_set:
-			# Extras in docstrings
-			self.errors.append((
-					node.lineno,
-					node.col_offset,
-					PRM003,
-					))
+		self.errors.append((
+				node.lineno,
+				node.col_offset,
+				error,
+				))
 
 		self.generic_visit(node)
 
-	# def visit_ClassDef(self, node: ast.ClassDef):
-	# 	breakpoint()
+	def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: D102
+		docstring = ast.get_docstring(node, clean=False)
+
+		if not docstring:
+			self.generic_visit(node)
+			return
+
+		docstring_args = []
+		for line in docstring.split('\n'):
+			line = line.strip()
+			if line.startswith(":param"):
+				docstring_args.append(line[6:].split(':', 1)[0].strip())
+
+		decorators = list(get_decorator_names(node))
+
+		signature_args = []
+		functions_in_body: List[ast.FunctionDef] = [n for n in node.body if isinstance(n, ast.FunctionDef)]
+
+		for function in functions_in_body:
+			if function.name == "__init__":
+				signature_args = [a.arg for a in function.args.args]
+				break
+		else:
+			# No __init__; maybe it comes from a base class.
+			# TODO: check for base classes and still error if non exist
+			return None
+
+		error = check_params(signature_args, docstring_args, decorators)
+		if not error:
+			self.generic_visit(node)
+			return
+
+		self.errors.append((
+				node.lineno,
+				node.col_offset,
+				error,
+				))
+
+		self.generic_visit(node)
 
 
 class Plugin(flake8_helper.Plugin[Visitor]):
