@@ -12,7 +12,7 @@ license: 'MIT'
 short_desc: "A flake8 plugin which checks for mismatches between function signatures and docstring params."
 
 use_whey: true
-min_coverage: 97
+min_coverage: 100
 sphinx_html_theme: furo
 docs_fail_on_warning: true
 enable_conda: false

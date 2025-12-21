@@ -8,3 +8,10 @@
 90:1: PRM003 Extra parameters in docstring.
 112:0: PRM003 Extra parameters in docstring.
 125:0: PRM001 Docstring parameters in wrong order.
+195:0: PRM002 Missing parameters in docstring.
+214:0: PRM002 Missing parameters in docstring.
+223:0: PRM001 Docstring parameters in wrong order.
+233:0: PRM003 Extra parameters in docstring.
+243:0: PRM003 Extra parameters in docstring.
+269:1: PRM002 Missing parameters in docstring.
+278:1: PRM003 Extra parameters in docstring.

@@ -190,3 +190,100 @@ def a_command(foo):
 
 def no_docstring(foo, bar, baz):
 	pass
+
+
+async def missing_in_docstring_async(foo, bar, baz):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	"""
+
+
+async def has_self_async(self, foo, bar, baz):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""
+
+
+async def missing_in_docstring_with_self_async(self, foo, bar, baz):
+	"""
+	Does something.
+
+	:param bar:
+	:param baz:
+	"""
+
+
+async def docstring_wrong_order_async(self, foo, bar, baz):
+	"""
+	Does something.
+
+	:param bar:
+	:param foo:
+	:param baz:
+	"""
+
+
+async def missing_in_signature_async(foo, bar):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""
+
+
+async def missing_in_signature_with_self_async(self, foo, bar):
+	"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz:
+	"""
+
+
+class AsyncClass:
+	"""
+	A class.
+	"""
+
+	@classmethod
+	async def is_classmethod(cls, foo, bar, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param bar:
+		:param baz:
+		"""
+
+	@classmethod
+	async def missing_in_docstring_with_classmethod(cls, foo, bar, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param baz:
+		"""
+
+	@classmethod
+	async def missing_in_signature_with_classmethod(cls, foo, baz):
+		"""
+		Does something.
+
+		:param foo:
+		:param bar:
+		:param baz:
+		"""
+
+
+async def no_docstring_async(foo, bar, baz):
+	pass

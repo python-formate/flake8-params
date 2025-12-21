@@ -137,9 +137,13 @@ class Visitor(flake8_helper.Visitor):
 	AST node visitor for identifying mismatches between function signatures and docstring params.
 	"""
 
-	# TODO: async functions
-
 	def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: D102
+		self._visit_function(node)
+
+	def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:  # noqa: D102
+		self._visit_function(node)
+
+	def _visit_function(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> None:
 		if node.name == "__init__":
 			self.generic_visit(node)
 			return
@@ -198,7 +202,8 @@ class Visitor(flake8_helper.Visitor):
 		else:
 			# No __init__; maybe it comes from a base class.
 			# TODO: check for base classes and still error if non exist
-			return None
+			self.generic_visit(node)
+			return
 
 		error = check_params(signature_args, docstring_args, decorators)
 		if not error:
