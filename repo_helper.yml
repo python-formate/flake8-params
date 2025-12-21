@@ -1,0 +1,56 @@
+# Configuration for 'repo_helper' (https://github.com/domdfcoding/repo_helper)
+---
+modname: flake8-params
+copyright_years: "2025"
+author: "Dominic Davis-Foster"
+email: "dominic@davis-foster.co.uk"
+version: "0.0.0"
+username: "python-formate"
+assignee: "domdfcoding"
+primary_conda_channel: "domdfcoding"
+license: 'MIT'
+short_desc: "A flake8 plugin which checks for mismatches between function signatures and docstring params."
+
+use_whey: true
+min_coverage: 97
+sphinx_html_theme: furo
+docs_fail_on_warning: true
+enable_conda: false
+
+# Versions to run tests for
+python_versions:
+ - '3.7'
+ - '3.8'
+ - '3.9'
+ - "3.10"
+ - "3.11"
+ - "3.12"
+ - "3.13"
+
+classifiers:
+ - 'Development Status :: 4 - Beta'
+ - 'Framework :: Flake8'
+ - 'Intended Audience :: Developers'
+ - "Topic :: Utilities"
+
+extra_sphinx_extensions:
+ - sphinx_toolbox.pre_commit
+ - sphinx_toolbox.flake8
+ - sphinx_toolbox.more_autosummary.column_widths
+ - sphinx_favicon
+
+entry_points:
+  flake8.extension:
+   - PRM=flake8_params:Plugin
+
+sphinx_conf_epilogue:
+ - nitpicky = True
+ - needspace_amount = r"5\baselineskip"
+ - 'favicons = [{"rel": "icon", "href": "https://python-formate.github.io/assets/formate.ico",  "sizes": "48x48", "type": "image/vnd.microsoft.icon"}]'
+
+keywords:
+ - flake8
+ - documentation
+
+exclude_files:
+ - contributing

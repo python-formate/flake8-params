@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+#
+#  __init__.py
+"""
+A flake8 plugin which checks for mismatches between function signatures and docstring params.
+
+.. autosummary-widths:: 1/3 2/3
+"""
+#
+#  Copyright (c) 2025 Dominic Davis-Foster <dominic@davis-foster.co.uk>
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#  THE SOFTWARE.
+#
+
+# stdlib
+import ast
+from typing import Iterator, Union
+
+# 3rd party
+import flake8_helper
+
+__all__ = ("Plugin", "Visitor", "get_decorator_names")
+
+__author__ = "Dominic Davis-Foster"
+__copyright__ = "2025 Dominic Davis-Foster"
+__license__ = "MIT"
+__version__ = "0.0.0"
+__email__ = "dominic@davis-foster.co.uk"
+
+PRM001 = "PRM001 Docstring parameters in wrong order."
+PRM002 = "PRM002 Missing parameters in docstring."
+PRM003 = "PRM003 Extra parameters in docstring."
+
+deco_allowed_attr_names = {
+		".setter",  # Property setter
+		".command",  # Probably a click command
+		".group",  # Probably a click group
+		}
+
+
+def _get_deco_name_parts(node: ast.expr) -> Iterator[str]:
+	if isinstance(node, ast.Name):
+		yield node.id
+	elif isinstance(node, ast.Attribute):
+		yield from _get_deco_name_parts(node.value)
+		yield node.attr
+	else:
+		raise NotImplementedError(node)
+
+
+def _get_deco_name(decorator: ast.expr) -> Iterator[str]:
+	if isinstance(decorator, (ast.Name, ast.Attribute)):
+		yield '.'.join(_get_deco_name_parts(decorator))
+	elif isinstance(decorator, ast.Call):
+		yield from _get_deco_name(decorator.func)
+	else:
+		raise NotImplementedError(decorator)
+
+
+def get_decorator_names(function: Union[ast.AsyncFunctionDef, ast.FunctionDef]) -> Iterator[str]:
+	"""
+	Returns an iterator of the dotted names of decorators for the given function.
+
+	:param function:
+	"""
+
+	for decorator in function.decorator_list:
+		yield from _get_deco_name(decorator)
+
+
+class Visitor(flake8_helper.Visitor):
+	"""
+	AST node visitor for identifying mismatches between function signatures and docstring params.
+	"""
+
+	def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: D102
+		docstring = ast.get_docstring(node, clean=False)
+		if node.name == "__init__":
+			# TODO: special case; parameters go on class
+			self.generic_visit(node)
+			return
+
+		if not docstring:
+			self.generic_visit(node)
+			return
+
+		seen_args = []
+		for line in docstring.split('\n'):
+			line = line.strip()
+			if line.startswith(":param"):
+				seen_args.append(line[6:].split(':', 1)[0].strip())
+
+		signature_args = [a.arg for a in node.args.args]
+		if "self" in signature_args:
+			signature_args.remove("self")
+
+		# decorators = [n.id for n in node.decorator_list if isinstance(n, ast.Name)]
+		decorators = list(get_decorator_names(node))
+		if "classmethod" in decorators and signature_args:
+			signature_args.pop(0)
+		for deco in decorators:
+			if any(deco.endswith(name) for name in deco_allowed_attr_names):
+				signature_args = []
+				break
+
+		if not signature_args and not seen_args:
+			# No args either way
+			self.generic_visit(node)
+			return
+
+		if signature_args == seen_args:
+			# All match
+			self.generic_visit(node)
+			return
+
+		# Either wrong order, extra in signature, extra in doc
+		signature_set = set(signature_args)
+		seen_set = set(seen_args)
+		if signature_set == seen_set:
+			# Wrong order
+			self.errors.append((
+					node.lineno,
+					node.col_offset,
+					PRM001,
+					))
+		elif signature_set - seen_set:
+			# Extras in signature
+			self.errors.append((
+					node.lineno,
+					node.col_offset,
+					PRM002,
+					))
+		elif seen_set - signature_set:
+			# Extras in docstrings
+			self.errors.append((
+					node.lineno,
+					node.col_offset,
+					PRM003,
+					))
+
+		self.generic_visit(node)
+
+	# def visit_ClassDef(self, node: ast.ClassDef):
+	# 	breakpoint()
+
+
+class Plugin(flake8_helper.Plugin[Visitor]):
+	"""
+	A Flake8 plugin which checks for mismatches between function signatures and docstring params.
+
+	:param tree: The abstract syntax tree (AST) to check.
+	"""
+
+	name: str = __name__
+
+	#: The plugin version
+	version: str = __version__
+
+	visitor_class = Visitor
