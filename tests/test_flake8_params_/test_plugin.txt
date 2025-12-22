@@ -17,3 +17,4 @@
 278:1: PRM003 Extra parameters in docstring: bar
 292:0: PRM002 Missing parameters in docstring: *baz
 311:0: PRM002 Missing parameters in docstring: **baz
+356:1: PRM002 Missing parameters in docstring: a b c

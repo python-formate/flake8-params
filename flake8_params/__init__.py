@@ -202,6 +202,10 @@ class Visitor(flake8_helper.Visitor):
 		signature_args = list(get_signature_args(node))
 		decorators = list(get_decorator_names(node))
 
+		if node.name == "__new__":
+			# Remove 'cls' etc.
+			signature_args.pop(0)
+
 		error = check_params(signature_args, docstring_args, decorators)
 		if not error:
 			self.generic_visit(node)

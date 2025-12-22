@@ -345,3 +345,19 @@ def positional_only(foo, /, bar, baz):
 	:param bar:
 	:param baz:
 	"""
+
+
+# stdlib
+from typing import Tuple
+
+
+class MyTuple(Tuple[int, str, int]):  # noqa: SLOT001
+
+	def __new__(cls, a: int, b: str, c: int = 0) -> "MyTuple":
+		"""
+		Create a new :class:`~.MyTuple`.
+
+		:rtype: :class:`~.MyTuple`.
+		"""
+
+		return super().__new__((a, b, c))  # type: ignore[arg-type]
