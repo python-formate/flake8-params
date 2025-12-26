@@ -124,7 +124,7 @@ def check_params(
 	docstring_set = set(docstring_args)
 	if signature_set == docstring_set:
 		# Wrong order or duplicated
-		docstring_counts = {k: v for k, v in Counter(docstring_set).items() if v > 1}
+		docstring_counts = {k: v for k, v in Counter(docstring_args).items() if v > 1}
 
 		if docstring_counts:
 			return PRM003 + ": " + ' '.join(sorted(docstring_counts.keys()))
