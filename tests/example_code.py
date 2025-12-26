@@ -177,7 +177,7 @@ class GoodClass:
 
 
 # 3rd party
-import click  # type: ignore
+import click
 
 
 @click.argument("-f", "--foo")
@@ -378,7 +378,7 @@ class MyABC(ABC):
 
 
 # 3rd party
-import pytest  # type: ignore
+import pytest
 
 
 @pytest.fixture()
