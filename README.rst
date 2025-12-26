@@ -91,7 +91,7 @@ flake8-params
 .. |language| image:: https://img.shields.io/github/languages/top/python-formate/flake8-params
 	:alt: GitHub top language
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/python-formate/flake8-params/v0.2.3
+.. |commits-since| image:: https://img.shields.io/github/commits-since/python-formate/flake8-params/v0.3.0
 	:target: https://github.com/python-formate/flake8-params/pulse
 	:alt: GitHub commits since tagged version
 
@@ -150,4 +150,4 @@ Sample ``.pre-commit-config.yaml``:
 	   rev: 3.8.1
 	   hooks:
 	    - id: flake8
-	      additional_dependencies: [flake8-params==0.2.3]
+	      additional_dependencies: [flake8-params==0.3.0]
