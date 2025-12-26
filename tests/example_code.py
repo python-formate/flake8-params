@@ -361,3 +361,17 @@ class MyTuple(Tuple[int, str, int]):  # noqa: SLOT001
 		"""
 
 		return super().__new__((a, b, c))  # type: ignore[arg-type]
+
+
+# stdlib
+from abc import ABC
+
+
+class MyABC(ABC):
+
+	def __init_subclass__(cls, swallow, **kwargs) -> None:
+		r"""
+		Setup something in the subclass.
+
+		:param \*\*kwargs:
+		"""

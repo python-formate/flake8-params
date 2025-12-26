@@ -18,3 +18,4 @@
 292:0: PRM002 Missing parameters in docstring: *baz
 311:0: PRM002 Missing parameters in docstring: **baz
 356:1: PRM002 Missing parameters in docstring: a b c
+372:1: PRM002 Missing parameters in docstring: swallow
