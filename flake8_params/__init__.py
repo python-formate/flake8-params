@@ -28,7 +28,7 @@ A flake8 plugin which checks for mismatches between function signatures and docs
 
 # stdlib
 import ast
-from typing import Iterator, List, Optional, Union
+from typing import Counter, Iterator, List, Optional, Union
 
 # 3rd party
 import flake8_helper
@@ -123,7 +123,12 @@ def check_params(
 	signature_set = set(signature_args)
 	docstring_set = set(docstring_args)
 	if signature_set == docstring_set:
-		# Wrong order
+		# Wrong order or duplicated
+		docstring_counts = {k: v for k, v in Counter(docstring_set).items() if v > 1}
+
+		if docstring_counts:
+			return PRM003 + ": " + ' '.join(sorted(docstring_counts.keys()))
+
 		return PRM001
 	elif signature_set - docstring_set:
 		# Extras in signature

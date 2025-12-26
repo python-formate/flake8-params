@@ -399,3 +399,12 @@ def another_command(foo):
 	"""
 	Command line entry point.
 	"""
+
+
+def duplicated_params(tree: list) -> None:
+	"""
+	Does something.
+
+	:param tree:
+	:param tree:
+	"""
