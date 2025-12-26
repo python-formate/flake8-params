@@ -375,3 +375,16 @@ class MyABC(ABC):
 
 		:param \*\*kwargs:
 		"""
+
+
+# 3rd party
+import pytest  # type: ignore
+
+
+@pytest.fixture()
+def a_fixture(foo) -> str:
+	"""
+	A pytest fixture .
+	"""
+
+	return "abc"
