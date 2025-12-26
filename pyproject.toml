@@ -4,7 +4,7 @@ build-backend = "whey"
 
 [project]
 name = "flake8-params"
-version = "0.2.2"
+version = "0.2.3"
 description = "A flake8 plugin which checks for mismatches between function signatures and docstring params."
 readme = "README.rst"
 keywords = [ "documentation", "flake8",]
