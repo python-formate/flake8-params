@@ -50,6 +50,8 @@ deco_allowed_attr_names = {
 		".setter",  # Property setter
 		".command",  # Probably a click command
 		".group",  # Probably a click group
+		"click.argument",  # Probably a click command or group
+		"click.option",  # Probably a click command or group
 		".fixture",  # Probably a pytest fixture
 		}
 

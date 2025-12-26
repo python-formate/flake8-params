@@ -388,3 +388,14 @@ def a_fixture(foo) -> str:
 	"""
 
 	return "abc"
+
+
+click_command = click.command
+
+
+@click.argument("-f", "--foo")
+@click_command()
+def another_command(foo):
+	"""
+	Command line entry point.
+	"""
