@@ -181,7 +181,7 @@ def get_docstring_args(docstring: str) -> Iterator[str]:
 	for line in docstring.split('\n'):
 		line = line.strip()
 		if line.startswith(":param"):
-			yield line[6:].split(':', 1)[0].strip().replace(r"\*", '*')
+			yield line[6:].split(':', 1)[0].strip().replace(r"\*", '*').replace(r"\_", '_')
 
 
 class Visitor(flake8_helper.Visitor):

@@ -408,3 +408,13 @@ def duplicated_params(tree: list) -> None:
 	:param tree:
 	:param tree:
 	"""
+
+
+def has_underscores(foo, bar, baz_):
+	r"""
+	Does something.
+
+	:param foo:
+	:param bar:
+	:param baz\_:
+	"""
