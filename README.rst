@@ -99,11 +99,11 @@ flake8-params
 	:target: https://github.com/python-formate/flake8-params/commit/master
 	:alt: GitHub last commit
 
-.. |maintained| image:: https://img.shields.io/maintenance/yes/2025
+.. |maintained| image:: https://img.shields.io/maintenance/yes/2026
 	:alt: Maintenance
 
 .. |pypi-downloads| image:: https://img.shields.io/pypi/dm/flake8-params
-	:target: https://pypi.org/project/flake8-params/
+	:target: https://pypistats.org/packages/flake8-params
 	:alt: PyPI - Downloads
 
 .. end shields
