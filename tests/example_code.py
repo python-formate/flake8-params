@@ -348,7 +348,7 @@ def positional_only(foo, /, bar, baz):
 
 
 # stdlib
-from typing import Tuple
+from typing import Optional, Tuple, overload
 
 
 class MyTuple(Tuple[int, str, int]):  # noqa: SLOT001
@@ -418,3 +418,27 @@ def has_underscores(foo, bar, baz_):
 	:param bar:
 	:param baz\_:
 	"""
+
+
+class FRange:
+	"""
+	A class with overloaded __init__.
+
+	:param start:
+	:param stop:
+	:param step:
+	"""
+
+	@overload
+	def __init__(self, stop: float) -> None: ...
+
+	@overload
+	def __init__(self, start: float, stop: float, step: float = ...) -> None: ...
+
+	def __init__(  # type: ignore[misc]
+		self,
+		start: Optional[float] = None,
+		stop: Optional[float] = None,
+		step: float = 1.0,
+	) -> None:
+		pass

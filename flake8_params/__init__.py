@@ -242,6 +242,10 @@ class Visitor(flake8_helper.Visitor):
 
 		for function in functions_in_body:
 			if function.name == "__init__":
+				init_decorators = list(get_decorator_names(function))
+				if any(d.endswith("overload") for d in init_decorators):
+					continue
+
 				signature_args = list(get_signature_args(function))
 				break
 		else:
